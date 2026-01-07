@@ -29,6 +29,9 @@ dependencies {
     // Telegram Bot API
     implementation("dev.inmo:tgbotapi:30.0.2") // https://central.sonatype.com/artifact/dev.inmo/tgbotapi
 
+    // Ktor client for custom HTTP configuration
+    implementation("io.ktor:ktor-client-cio:2.3.12")
+
     // Configuration
     implementation("com.sksamuel.hoplite:hoplite-core:2.8.0.RC3")
     implementation("com.sksamuel.hoplite:hoplite-yaml:2.8.0.RC3")

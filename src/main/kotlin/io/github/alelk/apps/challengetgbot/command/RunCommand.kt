@@ -9,12 +9,15 @@ import com.github.ajalt.clikt.parameters.types.file
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.addFileSource
 import dev.inmo.tgbotapi.bot.ktor.telegramBot
+import dev.inmo.tgbotapi.utils.TelegramAPIUrlsKeeper
 import io.github.alelk.apps.challengetgbot.config.AppConfig
 import io.github.alelk.apps.challengetgbot.db.DatabaseService
 import io.github.alelk.apps.challengetgbot.repository.ChallengeRepository
 import io.github.alelk.apps.challengetgbot.scheduler.ChallengeScheduler
 import io.github.alelk.apps.challengetgbot.telegram.TelegramBotService
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.ktor.client.*
+import io.ktor.client.engine.cio.*
 import kotlinx.coroutines.*
 import java.io.File
 
@@ -60,8 +63,15 @@ class RunCommand : CliktCommand(name = "run") {
         // Initialize repository
         val repository = ChallengeRepository()
 
-        // Initialize Telegram bot
-        val bot = telegramBot(config.botToken)
+        // Initialize Telegram bot with custom timeout for long polling
+        // Long polling uses 25-30 second waits, so we need a longer request timeout
+        val bot = telegramBot(TelegramAPIUrlsKeeper(config.botToken)) {
+            client = HttpClient(CIO) {
+                engine {
+                    requestTimeout = 65_000 // 65 seconds to handle long polling
+                }
+            }
+        }
         val telegramService = TelegramBotService(bot, repository)
 
         // Initialize scheduler
