@@ -1,5 +1,12 @@
 # Telegram Challenge Bot
 
+# [1.2.0](https://github.com/alelk/telegram-challenge-bot/compare/v1.1.0...v1.2.0) (2026-01-07)
+
+
+### Features
+
+* Add Ktor client for custom HTTP configuration and increase request timeout for Telegram bot long polling ([9f7bcd5](https://github.com/alelk/telegram-challenge-bot/commit/9f7bcd5b882ed57a88a0444928ca51091a31920e))
+
 # [1.1.0](https://github.com/alelk/telegram-challenge-bot/compare/v1.0.0...v1.1.0) (2026-01-07)
 
 
