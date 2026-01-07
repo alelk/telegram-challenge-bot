@@ -1,0 +1,51 @@
+botToken: "YOUR_BOT_TOKEN_HERE"
+databasePath: "./challenge-bot.db"
+
+groups:
+  - chatId: -1001234890  # Replace with your group chat ID
+    threadId: null  # Optional: thread ID for topics
+    name: "Fitness Challenge"
+
+    challenge:
+      questionTemplate: "{date} - Отжимания, приседания, пресс?"
+      isAnonymous: false
+      allowsMultipleAnswers: false
+      options:
+        - text: "Сделал по 25"
+          points: 25
+          countsAsCompleted: true
+        - text: "Сделал по 50"
+          points: 50
+          countsAsCompleted: true
+        - text: "Сделал по 75"
+          points: 75
+          countsAsCompleted: true
+        - text: "Сделал по 100"
+          points: 100
+          countsAsCompleted: true
+        - text: "Сделаю потом"
+          points: 0
+          countsAsCompleted: false
+
+    schedule:
+      frequency: DAILY  # DAILY, WEEKLY, or CUSTOM
+      time: "09:00:00"  # Time to post the challenge (HH:MM:SS)
+      timezone: "Europe/Moscow"
+      # daysOfWeek: [MONDAY, WEDNESDAY, FRIDAY]  # Optional: for WEEKLY or CUSTOM frequency
+
+    report:
+      frequency: WEEKLY  # DAILY, WEEKLY, or MONTHLY
+      dayOfWeek: MONDAY  # Day of week for weekly reports
+      time: "20:00:00"  # Time to send the report (HH:MM:SS)
+      timezone: "Europe/Moscow"
+      includeCompletionStats: true
+      includePointsStats: true
+      sortBy: POINTS_DESC  # POINTS_DESC, POINTS_ASC, COMPLETION_DESC, COMPLETION_ASC, NAME
+
+  # You can add more groups here
+  # - chatId: -1009876543210
+  #   name: "Another Group"
+  #   challenge:
+  #     questionTemplate: "Daily challenge: {date}"
+  #     ...
+
