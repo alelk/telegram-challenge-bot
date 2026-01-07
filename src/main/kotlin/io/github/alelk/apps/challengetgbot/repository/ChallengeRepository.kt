@@ -6,6 +6,7 @@ import io.github.alelk.apps.challengetgbot.db.PollAnswers
 import io.github.alelk.apps.challengetgbot.db.PollOptionConfigs
 import io.github.alelk.apps.challengetgbot.domain.ChallengeEntity
 import io.github.alelk.apps.challengetgbot.domain.PollAnswerEntity
+import io.github.alelk.apps.challengetgbot.domain.PollOptionConfig
 import io.github.alelk.apps.challengetgbot.domain.UserStatistics
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -185,12 +186,15 @@ class ChallengeRepository {
     /**
      * Get poll option configuration
      */
-    fun getPollOptionConfig(challengeId: Long, optionIndex: Int): Pair<Int, Boolean>? {
+    fun getPollOptionConfig(challengeId: Long, optionIndex: Int): PollOptionConfig? {
         return DatabaseService.query {
             PollOptionConfigs.selectAll()
                 .where { (PollOptionConfigs.challengeId eq challengeId) and (PollOptionConfigs.optionIndex eq optionIndex) }
                 .map { row ->
-                    Pair(row[PollOptionConfigs.points], row[PollOptionConfigs.countsAsCompleted])
+                    PollOptionConfig(
+                        points = row[PollOptionConfigs.points],
+                        countsAsCompleted = row[PollOptionConfigs.countsAsCompleted]
+                    )
                 }
                 .firstOrNull()
         }

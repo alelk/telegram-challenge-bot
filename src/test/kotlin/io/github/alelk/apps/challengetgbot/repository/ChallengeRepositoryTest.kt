@@ -3,6 +3,7 @@ package io.github.alelk.apps.challengetgbot.repository
 import io.github.alelk.apps.challengetgbot.db.DatabaseService
 import io.github.alelk.apps.challengetgbot.domain.ChallengeEntity
 import io.github.alelk.apps.challengetgbot.domain.PollAnswerEntity
+import io.github.alelk.apps.challengetgbot.domain.PollOptionConfig
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
@@ -297,9 +298,9 @@ class ChallengeRepositoryTest : FunSpec({
         val option2 = repository.getPollOptionConfig(challengeId, 2)
         val optionMissing = repository.getPollOptionConfig(challengeId, 99)
 
-        option0 shouldBe Pair(25, true)
-        option1 shouldBe Pair(50, true)
-        option2 shouldBe Pair(0, false)
+        option0 shouldBe PollOptionConfig(points = 25, countsAsCompleted = true)
+        option1 shouldBe PollOptionConfig(points = 50, countsAsCompleted = true)
+        option2 shouldBe PollOptionConfig(points = 0, countsAsCompleted = false)
         optionMissing shouldBe null
     }
 

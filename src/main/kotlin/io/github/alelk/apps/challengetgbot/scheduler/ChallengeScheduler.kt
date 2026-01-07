@@ -5,10 +5,10 @@ import io.github.alelk.apps.challengetgbot.config.GroupConfig
 import io.github.alelk.apps.challengetgbot.config.ReportFrequency
 import io.github.alelk.apps.challengetgbot.repository.ChallengeRepository
 import io.github.alelk.apps.challengetgbot.telegram.TelegramBotService
+import io.github.alelk.apps.challengetgbot.util.DateFormatter
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.*
 import java.time.DayOfWeek
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
@@ -221,40 +221,8 @@ class ChallengeScheduler(
      */
     private fun formatQuestionText(groupConfig: GroupConfig, time: Instant): String {
         val zoneId = ZoneId.of(groupConfig.schedule.timezone)
-        val localTime = ZonedDateTime.ofInstant(time.toJavaInstant(), zoneId).toLocalDateTime()
-
-        return groupConfig.challenge.questionTemplate
-            .replace("{date}", formatDate(localTime.toLocalDate()))
-            .replace("{day}", localTime.dayOfMonth.toString())
-            .replace("{month}", localTime.month.name.lowercase().replaceFirstChar { it.uppercase() })
-            .replace("{year}", localTime.year.toString())
-            .replace("{dayOfWeek}", formatDayOfWeek(localTime.dayOfWeek))
-    }
-
-    /**
-     * Format date in Russian format
-     */
-    private fun formatDate(date: LocalDate): String {
-        val monthNames = listOf(
-            "января", "февраля", "марта", "апреля", "мая", "июня",
-            "июля", "августа", "сентября", "октября", "ноября", "декабря"
-        )
-        return "${date.dayOfMonth} ${monthNames[date.monthValue - 1]}"
-    }
-
-    /**
-     * Format day of week in Russian
-     */
-    private fun formatDayOfWeek(dayOfWeek: DayOfWeek): String {
-        return when (dayOfWeek) {
-            DayOfWeek.MONDAY -> "понедельник"
-            DayOfWeek.TUESDAY -> "вторник"
-            DayOfWeek.WEDNESDAY -> "среда"
-            DayOfWeek.THURSDAY -> "четверг"
-            DayOfWeek.FRIDAY -> "пятница"
-            DayOfWeek.SATURDAY -> "суббота"
-            DayOfWeek.SUNDAY -> "воскресенье"
-        }
+        val localDate = ZonedDateTime.ofInstant(time.toJavaInstant(), zoneId).toLocalDate()
+        return DateFormatter.formatQuestionTemplate(groupConfig.challenge.questionTemplate, localDate)
     }
 }
 

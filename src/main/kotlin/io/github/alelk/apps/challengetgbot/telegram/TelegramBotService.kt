@@ -147,8 +147,8 @@ class TelegramBotService(
                 val optionConfig = repository.getPollOptionConfig(challenge.id, optionIndex)
 
                 if (optionConfig != null) {
-                    totalPoints += optionConfig.first
-                    if (optionConfig.second) {
+                    totalPoints += optionConfig.points
+                    if (optionConfig.countsAsCompleted) {
                         isCompleted = true
                     }
                 }

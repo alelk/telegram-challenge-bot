@@ -12,7 +12,8 @@ class ChallengeBotCommand : CliktCommand(name = "challenge-bot") {
     override fun help(context: Context): String = "Telegram Challenge Bot - управление челленджами в Telegram группах"
 
     override fun run() {
-        // If no subcommand is provided, show help
+        // Print help if no subcommand is provided
+        echoFormattedHelp()
     }
 }
 

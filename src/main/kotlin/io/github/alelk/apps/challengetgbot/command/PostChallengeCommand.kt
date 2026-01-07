@@ -12,15 +12,13 @@ import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.addFileSource
 import dev.inmo.tgbotapi.bot.ktor.telegramBot
 import io.github.alelk.apps.challengetgbot.config.AppConfig
-import io.github.alelk.apps.challengetgbot.config.GroupConfig
 import io.github.alelk.apps.challengetgbot.db.DatabaseService
 import io.github.alelk.apps.challengetgbot.repository.ChallengeRepository
 import io.github.alelk.apps.challengetgbot.telegram.TelegramBotService
+import io.github.alelk.apps.challengetgbot.util.DateFormatter
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.runBlocking
 import java.io.File
-import java.time.LocalDate
-import java.time.ZoneId
 
 private val log = KotlinLogging.logger {}
 
@@ -81,7 +79,7 @@ class PostChallengeCommand : CliktCommand(name = "post") {
         val telegramService = TelegramBotService(bot, repository)
 
         // Determine question text
-        val questionText = customQuestion ?: formatQuestionFromTemplate(groupConfig)
+        val questionText = customQuestion ?: DateFormatter.formatQuestionFromConfig(groupConfig)
         log.info { "Question: $questionText" }
 
         // Post challenge
@@ -95,38 +93,6 @@ class PostChallengeCommand : CliktCommand(name = "post") {
         } else {
             log.error { "Failed to post challenge" }
         }
-    }
-
-    /**
-     * Format question text with template variables
-     */
-    private fun formatQuestionFromTemplate(groupConfig: GroupConfig): String {
-        val zoneId = ZoneId.of(groupConfig.schedule.timezone)
-        val localDate = LocalDate.now(zoneId)
-
-        val monthNames = listOf(
-            "января", "февраля", "марта", "апреля", "мая", "июня",
-            "июля", "августа", "сентября", "октября", "ноября", "декабря"
-        )
-
-        val dayOfWeekNames = mapOf(
-            java.time.DayOfWeek.MONDAY to "понедельник",
-            java.time.DayOfWeek.TUESDAY to "вторник",
-            java.time.DayOfWeek.WEDNESDAY to "среда",
-            java.time.DayOfWeek.THURSDAY to "четверг",
-            java.time.DayOfWeek.FRIDAY to "пятница",
-            java.time.DayOfWeek.SATURDAY to "суббота",
-            java.time.DayOfWeek.SUNDAY to "воскресенье"
-        )
-
-        val formattedDate = "${localDate.dayOfMonth} ${monthNames[localDate.monthValue - 1]}"
-
-        return groupConfig.challenge.questionTemplate
-            .replace("{date}", formattedDate)
-            .replace("{day}", localDate.dayOfMonth.toString())
-            .replace("{month}", monthNames[localDate.monthValue - 1])
-            .replace("{year}", localDate.year.toString())
-            .replace("{dayOfWeek}", dayOfWeekNames[localDate.dayOfWeek] ?: localDate.dayOfWeek.name)
     }
 }
 
