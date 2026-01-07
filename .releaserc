@@ -1,0 +1,34 @@
+branches:
+  # release branch
+  - main
+
+  # prerelease branch
+  - name: next
+    prerelease: rc
+    channel: '${name}'
+
+tagFormat: v${version}
+
+plugins:
+  - '@semantic-release/commit-analyzer'
+  - '@semantic-release/release-notes-generator'
+  - - '@semantic-release/changelog'
+    - changelogFile: CHANGELOG.md
+      changelogTitle: '# Telegram Challenge Bot'
+  - - '@semantic-release/exec'
+    - analyzeCommitsCmd: |
+        echo "${lastRelease.version}" > .lastRelease.txt
+      verifyReleaseCmd: |
+        echo "${nextRelease.version}" > .nextRelease.txt
+        ./prepare.sh
+      publishCmd: ./publish.sh
+  - - '@semantic-release/github'
+    - assets:
+        - path: build/libs/telegram-challenge-bot-*-all.jar
+          label: telegram-challenge-bot.jar
+  - - '@semantic-release/git'
+    - assets:
+        - CHANGELOG.md
+        - app.version
+      message: "chore(release): ${nextRelease.version} [skip ci]\n\nRelease notes:\n${nextRelease.notes}"
+

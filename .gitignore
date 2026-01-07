@@ -32,3 +32,8 @@ config.yaml.local
 # Native image
 challenge-bot
 
+# Semantic release temp files
+.lastRelease.txt
+.nextRelease.txt
+node_modules/
+

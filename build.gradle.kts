@@ -1,12 +1,25 @@
 plugins {
-    kotlin("jvm") version "2.2.21"
-    kotlin("plugin.serialization") version "2.2.21"
+    kotlin("jvm") version "2.1.21"
+    kotlin("plugin.serialization") version "2.1.21"
     id("org.graalvm.buildtools.native") version "0.10.2"
+    id("com.gradleup.shadow") version "9.3.1"
     application
 }
 
 group = "io.github.alelk.apps.challengetgbot"
-version = "1.0"
+
+val versionName by extra(
+    runCatching {
+        checkNotNull(
+            File("app.version")
+                .readText()
+                .lines()
+                .firstOrNull()?.trim()
+                ?.takeIf { it.isNotBlank() }
+        ) { "app.version empty" }
+    }.getOrElse { "0.0.1-SNAPSHOT" }
+)
+version = versionName
 
 repositories { mavenCentral() }
 
@@ -14,7 +27,7 @@ val exposedVersion = "1.0.0-rc-4"
 
 dependencies {
     // Telegram Bot API
-    implementation("dev.inmo:tgbotapi:18.2.1") // https://central.sonatype.com/artifact/dev.inmo/tgbotapi
+    implementation("dev.inmo:tgbotapi:30.0.2") // https://central.sonatype.com/artifact/dev.inmo/tgbotapi
 
     // Configuration
     implementation("com.sksamuel.hoplite:hoplite-core:2.8.0.RC3")
