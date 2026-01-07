@@ -64,6 +64,48 @@ export CONFIG_PATH=config.yaml.local
 ./gradlew run
 ```
 
+## Ручная публикация челленджа
+
+Если нужно опубликовать челлендж вручную (например, после пропуска по расписанию):
+
+### Публикация с шаблоном из конфига
+
+```bash
+./gradlew run --args="post -c config.yaml.local 'Название группы'"
+```
+
+Или для нативного образа:
+
+```bash
+./build/native/nativeCompile/challenge-bot post -c config.yaml.local "Название группы"
+```
+
+### Публикация с кастомным заголовком
+
+```bash
+./gradlew run --args="post -c config.yaml.local 'Название группы' -q '7 января - Особенное задание!'"
+```
+
+### CLI команды
+
+**run** - запустить бот в режиме демона
+```bash
+challenge-bot run -c config.yaml
+```
+
+**post** - опубликовать один челлендж
+```bash
+challenge-bot post -c config.yaml "Group Name" [-q "Custom question"]
+```
+
+### CLI опции
+
+| Опция | Описание |
+|-------|----------|
+| `-c, --config <path>` | Путь к файлу конфигурации (по умолчанию: config.yaml) |
+| `-q, --question <text>` | Кастомный текст вопроса (только для post) |
+| `--help` | Показать справку |
+
 ## Компиляция в нативный образ
 
 ### Сборка нативного образа

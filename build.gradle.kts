@@ -20,6 +20,9 @@ dependencies {
     implementation("com.sksamuel.hoplite:hoplite-core:2.8.0.RC3")
     implementation("com.sksamuel.hoplite:hoplite-yaml:2.8.0.RC3")
 
+    // CLI
+    implementation("com.github.ajalt.clikt:clikt:5.0.3") //
+
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
 
