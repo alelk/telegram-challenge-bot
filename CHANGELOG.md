@@ -1,5 +1,12 @@
 # Telegram Challenge Bot
 
+# [1.1.0](https://github.com/alelk/telegram-challenge-bot/compare/v1.0.0...v1.1.0) (2026-01-07)
+
+
+### Features
+
+* Refactor question formatting and add PollOptionConfig data class ([94ff723](https://github.com/alelk/telegram-challenge-bot/commit/94ff723fa41503bece22a99a1144d4e57cacab49))
+
 # 1.0.0 (2026-01-07)
 
 
