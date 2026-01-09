@@ -1,5 +1,12 @@
 # Telegram Challenge Bot
 
+# [1.3.0](https://github.com/alelk/telegram-challenge-bot/compare/v1.2.0...v1.3.0) (2026-01-09)
+
+
+### Features
+
+* Simplify duration calculation and add local run configuration for the application ([30df4de](https://github.com/alelk/telegram-challenge-bot/commit/30df4de8b98befb47e0bd5042d371cecb327b40a))
+
 # [1.2.0](https://github.com/alelk/telegram-challenge-bot/compare/v1.1.0...v1.2.0) (2026-01-07)
 
 
