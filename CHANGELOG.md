@@ -1,5 +1,12 @@
 # Telegram Challenge Bot
 
+# [1.9.0](https://github.com/alelk/telegram-challenge-bot/compare/v1.8.0...v1.9.0) (2026-01-09)
+
+
+### Features
+
+* Add admin debug command to export database data in Telegram bot ([e4ff298](https://github.com/alelk/telegram-challenge-bot/commit/e4ff2985097ce8bae6ea7bbda3adcef0136137d3))
+
 # [1.8.0](https://github.com/alelk/telegram-challenge-bot/compare/v1.7.0...v1.8.0) (2026-01-09)
 
 
