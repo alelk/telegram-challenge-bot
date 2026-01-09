@@ -1,5 +1,12 @@
 # Telegram Challenge Bot
 
+# [1.6.0](https://github.com/alelk/telegram-challenge-bot/compare/v1.5.0...v1.6.0) (2026-01-09)
+
+
+### Features
+
+* Add /statistic command to Telegram bot for user statistics reporting ([17f7005](https://github.com/alelk/telegram-challenge-bot/commit/17f7005ec8585607ff744cfb968412c738cf5c78))
+
 # [1.5.0](https://github.com/alelk/telegram-challenge-bot/compare/v1.4.0...v1.5.0) (2026-01-09)
 
 
