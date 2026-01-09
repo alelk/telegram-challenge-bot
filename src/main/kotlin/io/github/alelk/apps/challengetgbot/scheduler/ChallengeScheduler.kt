@@ -9,6 +9,7 @@ import io.github.alelk.apps.challengetgbot.util.DateFormatter
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.*
 import java.time.DayOfWeek
+import java.time.Duration.between
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
@@ -68,7 +69,7 @@ class ChallengeScheduler(
             try {
                 val now = Clock.System.now()
                 val nextTime = calculateNextChallengeTime(groupConfig, now)
-                val delay = java.time.Duration.between(now.toJavaInstant(), nextTime.toJavaInstant()).toKotlinDuration()
+                val delay = between(now.toJavaInstant(), nextTime.toJavaInstant()).toKotlinDuration()
 
                 val zoneId = ZoneId.of(groupConfig.schedule.timezone)
                 logger.info {
@@ -79,7 +80,7 @@ class ChallengeScheduler(
                 delay(delay)
 
                 // Post the challenge
-                val questionText = formatQuestionText(groupConfig, now)
+                val questionText = formatQuestionText(groupConfig, Clock.System.now())
                 telegramService.postChallenge(groupConfig, questionText)
 
             } catch (e: CancellationException) {
@@ -99,7 +100,7 @@ class ChallengeScheduler(
             try {
                 val now = Clock.System.now()
                 val nextTime = calculateNextReportTime(groupConfig, now)
-                val delay = java.time.Duration.between(now.toJavaInstant(), nextTime.toJavaInstant()).toKotlinDuration()
+                val delay = between(now.toJavaInstant(), nextTime.toJavaInstant()).toKotlinDuration()
 
                 val zoneId = ZoneId.of(groupConfig.report.timezone)
                 logger.info {

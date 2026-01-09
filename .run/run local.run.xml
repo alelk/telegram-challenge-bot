@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="run local" type="JetRunConfigurationType">
+    <option name="MAIN_CLASS_NAME" value="io.github.alelk.apps.challengetgbot.AppKt" />
+    <module name="telegram-challenge-bot.main" />
+    <option name="PROGRAM_PARAMETERS" value="run --config config.local.yaml" />
+    <shortenClasspath name="NONE" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
