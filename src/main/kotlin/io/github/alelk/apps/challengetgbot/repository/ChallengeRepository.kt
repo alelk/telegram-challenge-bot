@@ -113,10 +113,22 @@ class ChallengeRepository(private val databaseService: DatabaseService) {
      */
     fun getUserStatistics(groupName: String, from: Instant? = null, to: Instant? = null): List<UserStatistics> {
         return databaseService.query {
-            val totalChallenges = getTotalChallengesCount(groupName, from, to)
+            // Count challenges directly without nested transaction
+            var challengeCondition: Op<Boolean> = Challenges.groupName eq groupName
+            from?.let { challengeCondition = challengeCondition and (Challenges.postedAt greaterEq it) }
+            to?.let { challengeCondition = challengeCondition and (Challenges.postedAt lessEq it) }
+
+            val totalChallenges = Challenges.selectAll()
+                .where { challengeCondition }
+                .count()
+                .toInt()
 
             val pointsSum = PollAnswers.points.sum()
             val completedSum = PollAnswers.isCompleted.castTo(IntegerColumnType()).sum()
+            // Use max to get the latest name values (in case user changed their name)
+            val userNameMax = PollAnswers.userName.max()
+            val firstNameMax = PollAnswers.userFirstName.max()
+            val lastNameMax = PollAnswers.userLastName.max()
 
             var condition: Op<Boolean> = Challenges.groupName eq groupName
             from?.let { condition = condition and (Challenges.postedAt greaterEq it) }
@@ -125,25 +137,20 @@ class ChallengeRepository(private val databaseService: DatabaseService) {
             (Challenges innerJoin PollAnswers)
                 .select(
                     PollAnswers.userId,
-                    PollAnswers.userName,
-                    PollAnswers.userFirstName,
-                    PollAnswers.userLastName,
+                    userNameMax,
+                    firstNameMax,
+                    lastNameMax,
                     pointsSum,
                     completedSum
                 )
                 .where { condition }
-                .groupBy(
-                    PollAnswers.userId,
-                    PollAnswers.userName,
-                    PollAnswers.userFirstName,
-                    PollAnswers.userLastName
-                )
+                .groupBy(PollAnswers.userId)
                 .map { row ->
                     UserStatistics(
                         userId = row[PollAnswers.userId],
-                        userName = row[PollAnswers.userName],
-                        firstName = row[PollAnswers.userFirstName],
-                        lastName = row[PollAnswers.userLastName],
+                        userName = row[userNameMax],
+                        firstName = row[firstNameMax],
+                        lastName = row[lastNameMax],
                         totalPoints = row[pointsSum] ?: 0,
                         completedCount = row[completedSum] ?: 0,
                         totalChallenges = totalChallenges
