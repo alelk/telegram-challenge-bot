@@ -1,5 +1,12 @@
 # Telegram Challenge Bot
 
+# [1.5.0](https://github.com/alelk/telegram-challenge-bot/compare/v1.4.0...v1.5.0) (2026-01-09)
+
+
+### Features
+
+* Implement Koin dependency injection and refactor database service initialization ([a4574af](https://github.com/alelk/telegram-challenge-bot/commit/a4574afb25cd8993b9605304351d7f780de95d1d))
+
 # [1.4.0](https://github.com/alelk/telegram-challenge-bot/compare/v1.3.0...v1.4.0) (2026-01-09)
 
 
