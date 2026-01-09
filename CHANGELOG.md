@@ -1,5 +1,12 @@
 # Telegram Challenge Bot
 
+# [1.7.0](https://github.com/alelk/telegram-challenge-bot/compare/v1.6.0...v1.7.0) (2026-01-09)
+
+
+### Features
+
+* Implement MigrationService for handling group name changes in database ([8e2e500](https://github.com/alelk/telegram-challenge-bot/commit/8e2e5007d18c9fb1ece43565a4d9d7fb5085b6e9))
+
 # [1.6.0](https://github.com/alelk/telegram-challenge-bot/compare/v1.5.0...v1.6.0) (2026-01-09)
 
 
