@@ -1,5 +1,12 @@
 # Telegram Challenge Bot
 
+# [1.8.0](https://github.com/alelk/telegram-challenge-bot/compare/v1.7.0...v1.8.0) (2026-01-09)
+
+
+### Features
+
+* Optimize user statistics query by simplifying challenge count and using max for user names ([ebcc122](https://github.com/alelk/telegram-challenge-bot/commit/ebcc122dcf627b8e6e5e94ded6e82753d0add6e9))
+
 # [1.7.0](https://github.com/alelk/telegram-challenge-bot/compare/v1.6.0...v1.7.0) (2026-01-09)
 
 
