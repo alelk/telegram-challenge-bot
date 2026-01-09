@@ -1,14 +1,19 @@
 package io.github.alelk.apps.challengetgbot.telegram
 
 import dev.inmo.tgbotapi.bot.TelegramBot
+import dev.inmo.tgbotapi.extensions.api.send.media.sendDocument
 import dev.inmo.tgbotapi.extensions.api.send.polls.sendRegularPoll
 import dev.inmo.tgbotapi.extensions.api.send.sendTextMessage
 import dev.inmo.tgbotapi.extensions.behaviour_builder.buildBehaviourWithLongPolling
 import dev.inmo.tgbotapi.extensions.behaviour_builder.triggers_handling.onCommand
+import dev.inmo.tgbotapi.extensions.behaviour_builder.triggers_handling.onContentMessage
 import dev.inmo.tgbotapi.extensions.behaviour_builder.triggers_handling.onPollAnswer
+import dev.inmo.tgbotapi.requests.abstracts.asMultipartFile
 import dev.inmo.tgbotapi.types.ChatId
 import dev.inmo.tgbotapi.types.MessageThreadId
 import dev.inmo.tgbotapi.types.RawChatId
+import dev.inmo.tgbotapi.types.chat.PrivateChat
+import dev.inmo.tgbotapi.types.message.content.TextContent
 import dev.inmo.tgbotapi.types.polls.InputPollOption
 import dev.inmo.tgbotapi.types.polls.PollAnswer
 import io.github.alelk.apps.challengetgbot.config.AppConfig
@@ -50,6 +55,20 @@ class TelegramBotService(
                 val threadId = (message as? dev.inmo.tgbotapi.types.message.abstracts.PossiblyTopicMessage)?.threadId?.long
                 handleStatisticCommand(message.chat.id.chatId.long, threadId)
             }
+
+            // Handle private messages for admin debug command
+            onContentMessage { message ->
+                val chat = message.chat
+                if (chat is PrivateChat) {
+                    val content = message.content
+                    if (content is TextContent) {
+                        val text = content.text.trim().lowercase()
+                        if (text == "debug") {
+                            handleDebugCommand(chat.id.chatId.long)
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -83,6 +102,44 @@ class TelegramBotService(
             logger.info { "Sent statistics report for group '${groupConfig.name}' on user request" }
         } catch (e: Exception) {
             logger.error(e) { "Failed to handle /statistic command" }
+        }
+    }
+
+    /**
+     * Handle "debug" message from admin in private chat.
+     * Sends a txt file with all database data.
+     */
+    private suspend fun handleDebugCommand(userId: Long) {
+        try {
+            // Check if user is an admin
+            if (userId !in appConfig.adminIds) {
+                logger.warn { "Non-admin user $userId attempted to use debug command" }
+                return
+            }
+
+            logger.info { "Admin $userId requested debug data export" }
+
+            // Export all database data
+            val exportData = repository.exportAllData()
+            val fileBytes = exportData.toByteArray(Charsets.UTF_8)
+
+            // Send as document
+            bot.sendDocument(
+                chatId = ChatId(RawChatId(userId)),
+                document = fileBytes.asMultipartFile("database_export.txt")
+            )
+
+            logger.info { "Sent debug data export to admin $userId" }
+        } catch (e: Exception) {
+            logger.error(e) { "Failed to handle debug command from user $userId" }
+            try {
+                bot.sendTextMessage(
+                    chatId = ChatId(RawChatId(userId)),
+                    text = "❌ Ошибка при экспорте данных: ${e.message}"
+                )
+            } catch (sendError: Exception) {
+                logger.error(sendError) { "Failed to send error message to user $userId" }
+            }
         }
     }
 

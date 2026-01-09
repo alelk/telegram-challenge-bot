@@ -1,6 +1,12 @@
 botToken: "YOUR_BOT_TOKEN_HERE"
 databasePath: "./challenge-bot.db"
 
+# List of Telegram user IDs that can use admin commands (e.g., "debug")
+# To get your user ID, you can use @userinfobot on Telegram
+adminIds:
+  # - 123456789
+  # - 987654321
+
 groups:
   - chatId: -1001234890  # Replace with your group chat ID
     threadId: null  # Optional: thread ID for topics

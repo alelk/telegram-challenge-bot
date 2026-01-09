@@ -243,5 +243,79 @@ class ChallengeRepository(private val databaseService: DatabaseService) {
             }
         }
     }
-}
 
+    /**
+     * Export all database data to a formatted string for debugging purposes.
+     */
+    fun exportAllData(): String {
+        return databaseService.query {
+            val sb = StringBuilder()
+
+            // Export Challenges table
+            sb.appendLine("=".repeat(80))
+            sb.appendLine("TABLE: CHALLENGES")
+            sb.appendLine("=".repeat(80))
+            val challenges = Challenges.selectAll().toList()
+            if (challenges.isEmpty()) {
+                sb.appendLine("(no records)")
+            } else {
+                challenges.forEach { row ->
+                    sb.appendLine("ID: ${row[Challenges.id].value}")
+                    sb.appendLine("  Group Name: ${row[Challenges.groupName]}")
+                    sb.appendLine("  Poll ID: ${row[Challenges.pollId]}")
+                    sb.appendLine("  Message ID: ${row[Challenges.messageId]}")
+                    sb.appendLine("  Chat ID: ${row[Challenges.chatId]}")
+                    sb.appendLine("  Question: ${row[Challenges.questionText]}")
+                    sb.appendLine("  Posted At: ${row[Challenges.postedAt]}")
+                    sb.appendLine("-".repeat(40))
+                }
+            }
+            sb.appendLine()
+
+            // Export PollAnswers table
+            sb.appendLine("=".repeat(80))
+            sb.appendLine("TABLE: POLL_ANSWERS")
+            sb.appendLine("=".repeat(80))
+            val answers = PollAnswers.selectAll().toList()
+            if (answers.isEmpty()) {
+                sb.appendLine("(no records)")
+            } else {
+                answers.forEach { row ->
+                    sb.appendLine("ID: ${row[PollAnswers.id].value}")
+                    sb.appendLine("  Challenge ID: ${row[PollAnswers.challengeId].value}")
+                    sb.appendLine("  User ID: ${row[PollAnswers.userId]}")
+                    sb.appendLine("  User Name: ${row[PollAnswers.userName]}")
+                    sb.appendLine("  First Name: ${row[PollAnswers.userFirstName]}")
+                    sb.appendLine("  Last Name: ${row[PollAnswers.userLastName]}")
+                    sb.appendLine("  Option IDs: ${row[PollAnswers.optionIds]}")
+                    sb.appendLine("  Points: ${row[PollAnswers.points]}")
+                    sb.appendLine("  Is Completed: ${row[PollAnswers.isCompleted]}")
+                    sb.appendLine("  Answered At: ${row[PollAnswers.answeredAt]}")
+                    sb.appendLine("-".repeat(40))
+                }
+            }
+            sb.appendLine()
+
+            // Export PollOptionConfigs table
+            sb.appendLine("=".repeat(80))
+            sb.appendLine("TABLE: POLL_OPTION_CONFIGS")
+            sb.appendLine("=".repeat(80))
+            val configs = PollOptionConfigs.selectAll().toList()
+            if (configs.isEmpty()) {
+                sb.appendLine("(no records)")
+            } else {
+                configs.forEach { row ->
+                    sb.appendLine("ID: ${row[PollOptionConfigs.id].value}")
+                    sb.appendLine("  Challenge ID: ${row[PollOptionConfigs.challengeId].value}")
+                    sb.appendLine("  Option Index: ${row[PollOptionConfigs.optionIndex]}")
+                    sb.appendLine("  Option Text: ${row[PollOptionConfigs.optionText]}")
+                    sb.appendLine("  Points: ${row[PollOptionConfigs.points]}")
+                    sb.appendLine("  Counts As Completed: ${row[PollOptionConfigs.countsAsCompleted]}")
+                    sb.appendLine("-".repeat(40))
+                }
+            }
+
+            sb.toString()
+        }
+    }
+}
