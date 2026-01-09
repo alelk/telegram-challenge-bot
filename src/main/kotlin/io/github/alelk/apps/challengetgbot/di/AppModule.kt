@@ -9,6 +9,7 @@ import io.github.alelk.apps.challengetgbot.config.AppConfig
 import io.github.alelk.apps.challengetgbot.db.DatabaseService
 import io.github.alelk.apps.challengetgbot.repository.ChallengeRepository
 import io.github.alelk.apps.challengetgbot.scheduler.ChallengeScheduler
+import io.github.alelk.apps.challengetgbot.service.MigrationService
 import io.github.alelk.apps.challengetgbot.telegram.TelegramBotService
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
@@ -51,6 +52,9 @@ fun appModule(configFile: File) = module {
 
     // Telegram Service
     singleOf(::TelegramBotService)
+
+    // Migration Service
+    singleOf(::MigrationService)
 
     // Scheduler
     singleOf(::ChallengeScheduler)

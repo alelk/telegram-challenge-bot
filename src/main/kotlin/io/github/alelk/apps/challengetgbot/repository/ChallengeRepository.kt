@@ -223,5 +223,18 @@ class ChallengeRepository(private val databaseService: DatabaseService) {
                 .firstOrNull()
         }
     }
+
+    /**
+     * Migrate group name from old name to new name in all challenges.
+     * This is used when a group is renamed in configuration.
+     * @return the number of records updated
+     */
+    fun migrateGroupName(oldName: String, newName: String): Int {
+        return databaseService.query {
+            Challenges.update({ Challenges.groupName eq oldName }) {
+                it[groupName] = newName
+            }
+        }
+    }
 }
 

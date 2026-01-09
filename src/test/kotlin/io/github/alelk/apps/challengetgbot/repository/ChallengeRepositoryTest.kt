@@ -423,6 +423,64 @@ class ChallengeRepositoryTest : FunSpec(), KoinTest {
             val statsAfter = repository.getUserStatistics("DeleteStatsGroup")
             statsAfter shouldHaveSize 0
         }
+
+        test("migrateGroupName should rename group in all challenges") {
+            val repository = get<ChallengeRepository>()
+
+            // Create challenges with old group name
+            repository.saveChallenge(
+                ChallengeEntity(
+                    groupName = "OldGroupName",
+                    pollId = "migrate1",
+                    messageId = 1L,
+                    chatId = -1001234567890L,
+                    questionText = "Q1",
+                    postedAt = Clock.System.now()
+                )
+            )
+            repository.saveChallenge(
+                ChallengeEntity(
+                    groupName = "OldGroupName",
+                    pollId = "migrate2",
+                    messageId = 2L,
+                    chatId = -1001234567890L,
+                    questionText = "Q2",
+                    postedAt = Clock.System.now()
+                )
+            )
+            repository.saveChallenge(
+                ChallengeEntity(
+                    groupName = "OtherGroup",
+                    pollId = "migrate3",
+                    messageId = 3L,
+                    chatId = -1001234567890L,
+                    questionText = "Q3",
+                    postedAt = Clock.System.now()
+                )
+            )
+
+            // Verify initial state
+            repository.getTotalChallengesCount("OldGroupName") shouldBe 2
+            repository.getTotalChallengesCount("NewGroupName") shouldBe 0
+            repository.getTotalChallengesCount("OtherGroup") shouldBe 1
+
+            // Migrate group name
+            val updatedCount = repository.migrateGroupName("OldGroupName", "NewGroupName")
+
+            // Verify migration
+            updatedCount shouldBe 2
+            repository.getTotalChallengesCount("OldGroupName") shouldBe 0
+            repository.getTotalChallengesCount("NewGroupName") shouldBe 2
+            repository.getTotalChallengesCount("OtherGroup") shouldBe 1
+        }
+
+        test("migrateGroupName should return 0 when no records match") {
+            val repository = get<ChallengeRepository>()
+
+            val updatedCount = repository.migrateGroupName("NonExistentGroup", "NewName")
+
+            updatedCount shouldBe 0
+        }
     }
 }
 

@@ -9,6 +9,7 @@ import com.github.ajalt.clikt.parameters.types.file
 import io.github.alelk.apps.challengetgbot.config.AppConfig
 import io.github.alelk.apps.challengetgbot.di.appModule
 import io.github.alelk.apps.challengetgbot.scheduler.ChallengeScheduler
+import io.github.alelk.apps.challengetgbot.service.MigrationService
 import io.github.alelk.apps.challengetgbot.telegram.TelegramBotService
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.*
@@ -56,8 +57,12 @@ class RunCommand : CliktCommand(name = "run"), KoinComponent {
         val config: AppConfig by inject()
         val telegramService: TelegramBotService by inject()
         val scheduler: ChallengeScheduler by inject()
+        val migrationService: MigrationService by inject()
 
         log.info { "Configuration loaded. Managing ${config.groups.size} group(s)" }
+
+        // Run database migrations (e.g., group name changes)
+        migrationService.runMigrations()
 
         // Create coroutine scope
         val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
