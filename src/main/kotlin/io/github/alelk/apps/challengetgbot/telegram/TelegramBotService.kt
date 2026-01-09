@@ -4,12 +4,14 @@ import dev.inmo.tgbotapi.bot.TelegramBot
 import dev.inmo.tgbotapi.extensions.api.send.polls.sendRegularPoll
 import dev.inmo.tgbotapi.extensions.api.send.sendTextMessage
 import dev.inmo.tgbotapi.extensions.behaviour_builder.buildBehaviourWithLongPolling
+import dev.inmo.tgbotapi.extensions.behaviour_builder.triggers_handling.onCommand
 import dev.inmo.tgbotapi.extensions.behaviour_builder.triggers_handling.onPollAnswer
 import dev.inmo.tgbotapi.types.ChatId
 import dev.inmo.tgbotapi.types.MessageThreadId
 import dev.inmo.tgbotapi.types.RawChatId
 import dev.inmo.tgbotapi.types.polls.InputPollOption
 import dev.inmo.tgbotapi.types.polls.PollAnswer
+import io.github.alelk.apps.challengetgbot.config.AppConfig
 import io.github.alelk.apps.challengetgbot.config.GroupConfig
 import io.github.alelk.apps.challengetgbot.config.SortBy
 import io.github.alelk.apps.challengetgbot.domain.ChallengeEntity
@@ -29,19 +31,58 @@ private val logger = KotlinLogging.logger {}
 @OptIn(ExperimentalTime::class)
 class TelegramBotService(
     private val bot: TelegramBot,
-    private val repository: ChallengeRepository
+    private val repository: ChallengeRepository,
+    private val appConfig: AppConfig
 ) {
 
     /**
-     * Start the bot and listen for poll answers
+     * Start the bot and listen for poll answers and commands
      */
     suspend fun start(scope: CoroutineScope) {
-        bot.buildBehaviourWithLongPolling(scope = scope) {
+        bot.buildBehaviourWithLongPolling(scope = scope, timeoutSeconds = 10 * 60) {
             logger.info { "Bot started successfully" }
 
             onPollAnswer { pollAnswer ->
                 handlePollAnswer(pollAnswer)
             }
+
+            onCommand("statistic") { message ->
+                val threadId = (message as? dev.inmo.tgbotapi.types.message.abstracts.PossiblyTopicMessage)?.threadId?.long
+                handleStatisticCommand(message.chat.id.chatId.long, threadId)
+            }
+        }
+    }
+
+    /**
+     * Handle /statistic command
+     */
+    private suspend fun handleStatisticCommand(chatId: Long, threadId: Long?) {
+        try {
+            // Find the group configuration by chatId
+            val groupConfig = appConfig.groups.find { it.chatId == chatId }
+
+            if (groupConfig == null) {
+                logger.warn { "Received /statistic command from unknown chat: $chatId" }
+                bot.sendTextMessage(
+                    chatId = ChatId(RawChatId(chatId)),
+                    text = "❌ Эта группа не настроена для использования бота.",
+                    threadId = threadId?.let { MessageThreadId(it) }
+                )
+                return
+            }
+
+            // Get statistics for the group
+            val statistics = repository.getUserStatistics(groupConfig.name)
+            val totalChallenges = repository.getTotalChallengesCount(groupConfig.name)
+
+            // Add totalChallenges to each user's statistics
+            val statsWithTotal = statistics.map { it.copy(totalChallenges = totalChallenges) }
+
+            // Send the report
+            sendReport(groupConfig, statsWithTotal)
+            logger.info { "Sent statistics report for group '${groupConfig.name}' on user request" }
+        } catch (e: Exception) {
+            logger.error(e) { "Failed to handle /statistic command" }
         }
     }
 
@@ -122,7 +163,7 @@ class TelegramBotService(
      * - Vote change (user selects different option)
      * - Vote retraction (user removes their vote - empty optionIds)
      */
-    private suspend fun handlePollAnswer(pollAnswer: PollAnswer) {
+    private fun handlePollAnswer(pollAnswer: PollAnswer) {
         try {
             val challenge = repository.findChallengeByPollId(pollAnswer.pollId.string) ?: run {
                 logger.warn { "Received poll answer for unknown poll: ${pollAnswer.pollId}" }
