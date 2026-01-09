@@ -46,6 +46,10 @@ jobs:
         run: npm install --global semantic-release@24.1.2 @semantic-release/changelog@6.0.3 @semantic-release/git@10.0.1 @semantic-release/github@11.0.1 @semantic-release/exec@6.0.3
         if: success() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/next')
 
+      - name: Clean existing JAR files with previous version
+        run: rm -f build/libs/*-all.jar
+        if: success() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/next')
+
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
