@@ -1,5 +1,12 @@
 # Telegram Challenge Bot
 
+# [1.4.0](https://github.com/alelk/telegram-challenge-bot/compare/v1.3.0...v1.4.0) (2026-01-09)
+
+
+### Features
+
+* Clean up existing JAR files before release in CI configuration ([07c34c3](https://github.com/alelk/telegram-challenge-bot/commit/07c34c350da27b6d9ea04a6232825c94bce936fd))
+
 # [1.3.0](https://github.com/alelk/telegram-challenge-bot/compare/v1.2.0...v1.3.0) (2026-01-09)
 
 
