@@ -8,16 +8,16 @@ import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.help
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
-import com.sksamuel.hoplite.ConfigLoaderBuilder
-import com.sksamuel.hoplite.addFileSource
-import dev.inmo.tgbotapi.bot.ktor.telegramBot
 import io.github.alelk.apps.challengetgbot.config.AppConfig
-import io.github.alelk.apps.challengetgbot.db.DatabaseService
-import io.github.alelk.apps.challengetgbot.repository.ChallengeRepository
+import io.github.alelk.apps.challengetgbot.di.appModule
 import io.github.alelk.apps.challengetgbot.telegram.TelegramBotService
 import io.github.alelk.apps.challengetgbot.util.DateFormatter
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.runBlocking
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
 import java.io.File
 
 private val log = KotlinLogging.logger {}
@@ -25,7 +25,7 @@ private val log = KotlinLogging.logger {}
 /**
  * Command to post a single challenge manually
  */
-class PostChallengeCommand : CliktCommand(name = "post") {
+class PostChallengeCommand : CliktCommand(name = "post"), KoinComponent {
 
     override fun help(context: Context): String = "Опубликовать челлендж вручную"
 
@@ -49,49 +49,47 @@ class PostChallengeCommand : CliktCommand(name = "post") {
     private suspend fun postChallenge() {
         log.info { "Loading configuration from: ${configFile.absolutePath}" }
 
-        val config = try {
-            ConfigLoaderBuilder.default()
-                .addFileSource(configFile)
-                .build()
-                .loadConfigOrThrow<AppConfig>()
+        // Initialize Koin DI
+        try {
+            startKoin {
+                modules(appModule(configFile))
+            }
         } catch (e: Exception) {
-            log.error(e) { "Failed to load configuration from ${configFile.absolutePath}" }
+            log.error(e) { "Failed to initialize application" }
             return
         }
 
-        val groupConfig = config.groups.find { it.name == groupName }
-        if (groupConfig == null) {
-            log.error { "Group '$groupName' not found in configuration" }
-            log.info { "Available groups: ${config.groups.map { it.name }}" }
-            return
-        }
+        try {
+            // Get dependencies from Koin
+            val config: AppConfig by inject()
+            val telegramService: TelegramBotService by inject()
 
-        log.info { "Posting challenge to group: ${groupConfig.name}" }
+            val groupConfig = config.groups.find { it.name == groupName }
+            if (groupConfig == null) {
+                log.error { "Group '$groupName' not found in configuration" }
+                log.info { "Available groups: ${config.groups.map { it.name }}" }
+                return
+            }
 
-        // Initialize database
-        DatabaseService.init(config.databasePath)
+            log.info { "Posting challenge to group: ${groupConfig.name}" }
 
-        // Initialize repository
-        val repository = ChallengeRepository()
+            // Determine question text
+            val questionText = customQuestion ?: DateFormatter.formatQuestionFromConfig(groupConfig)
+            log.info { "Question: $questionText" }
 
-        // Initialize Telegram bot
-        val bot = telegramBot(config.botToken)
-        val telegramService = TelegramBotService(bot, repository)
+            // Post challenge
+            val challenge = telegramService.postChallenge(groupConfig, questionText)
 
-        // Determine question text
-        val questionText = customQuestion ?: DateFormatter.formatQuestionFromConfig(groupConfig)
-        log.info { "Question: $questionText" }
-
-        // Post challenge
-        val challenge = telegramService.postChallenge(groupConfig, questionText)
-
-        if (challenge != null) {
-            log.info { "Challenge posted successfully!" }
-            log.info { "  Poll ID: ${challenge.pollId}" }
-            log.info { "  Message ID: ${challenge.messageId}" }
-            log.info { "  Chat ID: ${challenge.chatId}" }
-        } else {
-            log.error { "Failed to post challenge" }
+            if (challenge != null) {
+                log.info { "Challenge posted successfully!" }
+                log.info { "  Poll ID: ${challenge.pollId}" }
+                log.info { "  Message ID: ${challenge.messageId}" }
+                log.info { "  Chat ID: ${challenge.chatId}" }
+            } else {
+                log.error { "Failed to post challenge" }
+            }
+        } finally {
+            stopKoin()
         }
     }
 }

@@ -24,6 +24,7 @@ version = versionName
 repositories { mavenCentral() }
 
 val exposedVersion = "1.0.0-rc-4"
+val koinVersion = "4.1.0"
 
 dependencies {
     // Telegram Bot API
@@ -41,6 +42,9 @@ dependencies {
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
+
+    // Dependency Injection - Koin
+    implementation("io.insert-koin:koin-core:$koinVersion")
 
 
     // Database - Exposed ORM with H2
@@ -60,6 +64,7 @@ dependencies {
     testImplementation("io.kotest:kotest-property:5.8.0")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
     testImplementation("io.mockk:mockk:1.13.9")
+    testImplementation("io.insert-koin:koin-test:$koinVersion")
 }
 
 application {

@@ -14,7 +14,7 @@ data class UserStatistics(
 ) {
     val displayName: String
         get() = when {
-            !userName.isNullOrBlank() -> "@$userName"
+            !userName.isNullOrBlank() -> if (userName.startsWith("@")) userName else "@$userName"
             !firstName.isNullOrBlank() && !lastName.isNullOrBlank() -> "$firstName $lastName"
             !firstName.isNullOrBlank() -> firstName
             !lastName.isNullOrBlank() -> lastName

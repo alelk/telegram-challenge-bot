@@ -111,6 +111,19 @@ class UserStatisticsTest : FunSpec({
             )
             stats.displayName shouldBe "Петров"
         }
+
+        test("should not add extra @ when username already starts with @") {
+            val stats = UserStatistics(
+                userId = 100L,
+                userName = "@already_prefixed",
+                firstName = "Test",
+                lastName = "User",
+                totalPoints = 100,
+                completedCount = 5,
+                totalChallenges = 10
+            )
+            stats.displayName shouldBe "@already_prefixed"
+        }
     }
 
     context("statistics values") {

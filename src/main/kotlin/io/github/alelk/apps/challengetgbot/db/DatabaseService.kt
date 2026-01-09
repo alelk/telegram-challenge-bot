@@ -10,37 +10,12 @@ private val logger = KotlinLogging.logger {}
 /**
  * Database service for managing database connections and schema
  */
-object DatabaseService {
-    private lateinit var database: Database
+class DatabaseService private constructor(private val database: Database) {
 
-    /**
-     * Initialize database connection and create schema
-     */
-    fun init(databasePath: String) {
-        logger.info { "Initializing database at: $databasePath" }
-
-        database = Database.connect(
-            url = "jdbc:h2:file:$databasePath;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE",
-            driver = "org.h2.Driver"
-        )
-
+    init {
         transaction(database) {
             SchemaUtils.create(Challenges, PollAnswers, PollOptionConfigs)
             logger.info { "Database schema initialized" }
-        }
-    }
-
-    /**
-     * Initialize in-memory database for testing
-     */
-    fun initForTest() {
-        database = Database.connect(
-            url = "jdbc:h2:mem:test_${System.currentTimeMillis()};DB_CLOSE_DELAY=-1;MODE=PostgreSQL",
-            driver = "org.h2.Driver"
-        )
-
-        transaction(database) {
-            SchemaUtils.create(Challenges, PollAnswers, PollOptionConfigs)
         }
     }
 
@@ -59,6 +34,31 @@ object DatabaseService {
     fun <T> query(block: () -> T): T {
         return transaction(database) {
             block()
+        }
+    }
+
+    companion object {
+        /**
+         * Create database service with file-based database
+         */
+        operator fun invoke(databasePath: String): DatabaseService {
+            logger.info { "Initializing database at: $databasePath" }
+            val database = Database.connect(
+                url = "jdbc:h2:file:$databasePath;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE",
+                driver = "org.h2.Driver"
+            )
+            return DatabaseService(database)
+        }
+
+        /**
+         * Create database service with in-memory database for testing
+         */
+        fun createForTest(): DatabaseService {
+            val database = Database.connect(
+                url = "jdbc:h2:mem:test_${System.currentTimeMillis()};DB_CLOSE_DELAY=-1;MODE=PostgreSQL",
+                driver = "org.h2.Driver"
+            )
+            return DatabaseService(database)
         }
     }
 }

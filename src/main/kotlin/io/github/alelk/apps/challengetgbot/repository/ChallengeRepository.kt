@@ -17,13 +17,13 @@ import org.jetbrains.exposed.v1.jdbc.*
  * Repository for managing challenges and poll answers
  */
 @OptIn(ExperimentalTime::class)
-class ChallengeRepository {
+class ChallengeRepository(private val databaseService: DatabaseService) {
 
     /**
      * Save a new challenge
      */
     fun saveChallenge(challenge: ChallengeEntity): Long {
-        return DatabaseService.query {
+        return databaseService.query {
             Challenges.insertAndGetId {
                 it[groupName] = challenge.groupName
                 it[pollId] = challenge.pollId
@@ -39,7 +39,7 @@ class ChallengeRepository {
      * Find challenge by poll ID
      */
     fun findChallengeByPollId(pollId: String): ChallengeEntity? {
-        return DatabaseService.query {
+        return databaseService.query {
             Challenges.selectAll()
                 .where { Challenges.pollId eq pollId }
                 .map { row ->
@@ -62,7 +62,7 @@ class ChallengeRepository {
      * When user changes their answer, the old answer is replaced with new points and completion status.
      */
     fun savePollAnswer(answer: PollAnswerEntity) {
-        DatabaseService.query {
+        databaseService.query {
             val existing = PollAnswers.selectAll()
                 .where { (PollAnswers.challengeId eq answer.challengeId) and (PollAnswers.userId eq answer.userId) }
                 .firstOrNull()
@@ -100,7 +100,7 @@ class ChallengeRepository {
      * Delete poll answer when user retracts their vote
      */
     fun deletePollAnswer(challengeId: Long, userId: Long) {
-        DatabaseService.query {
+        databaseService.query {
             PollAnswers.deleteWhere {
                 (PollAnswers.challengeId eq challengeId) and (PollAnswers.userId eq userId)
             }
@@ -112,11 +112,11 @@ class ChallengeRepository {
      * Statistics are calculated from current poll answer values (already updated if user changed their vote).
      */
     fun getUserStatistics(groupName: String, from: Instant? = null, to: Instant? = null): List<UserStatistics> {
-        return DatabaseService.query {
+        return databaseService.query {
             val totalChallenges = getTotalChallengesCount(groupName, from, to)
 
             val pointsSum = PollAnswers.points.sum()
-            val completedSum = PollAnswers.isCompleted.castTo<Int>(IntegerColumnType()).sum()
+            val completedSum = PollAnswers.isCompleted.castTo(IntegerColumnType()).sum()
 
             var condition: Op<Boolean> = Challenges.groupName eq groupName
             from?.let { condition = condition and (Challenges.postedAt greaterEq it) }
@@ -156,7 +156,7 @@ class ChallengeRepository {
      * Get total number of challenges for a group in time range
      */
     fun getTotalChallengesCount(groupName: String, from: Instant? = null, to: Instant? = null): Int {
-        return DatabaseService.query {
+        return databaseService.query {
             var condition: Op<Boolean> = Challenges.groupName eq groupName
             from?.let { condition = condition and (Challenges.postedAt greaterEq it) }
             to?.let { condition = condition and (Challenges.postedAt lessEq it) }
@@ -172,7 +172,7 @@ class ChallengeRepository {
      * Save poll option configuration
      */
     fun savePollOptionConfig(challengeId: Long, optionIndex: Int, optionText: String, points: Int, countsAsCompleted: Boolean) {
-        DatabaseService.query {
+        databaseService.query {
             PollOptionConfigs.insert {
                 it[PollOptionConfigs.challengeId] = challengeId
                 it[PollOptionConfigs.optionIndex] = optionIndex
@@ -187,7 +187,7 @@ class ChallengeRepository {
      * Get poll option configuration
      */
     fun getPollOptionConfig(challengeId: Long, optionIndex: Int): PollOptionConfig? {
-        return DatabaseService.query {
+        return databaseService.query {
             PollOptionConfigs.selectAll()
                 .where { (PollOptionConfigs.challengeId eq challengeId) and (PollOptionConfigs.optionIndex eq optionIndex) }
                 .map { row ->
@@ -204,7 +204,7 @@ class ChallengeRepository {
      * Get poll answer for a specific user and challenge
      */
     fun getPollAnswer(challengeId: Long, userId: Long): PollAnswerEntity? {
-        return DatabaseService.query {
+        return databaseService.query {
             PollAnswers.selectAll()
                 .where { (PollAnswers.challengeId eq challengeId) and (PollAnswers.userId eq userId) }
                 .map { row ->

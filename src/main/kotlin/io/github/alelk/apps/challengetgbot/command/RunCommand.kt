@@ -6,19 +6,16 @@ import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.help
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
-import com.sksamuel.hoplite.ConfigLoaderBuilder
-import com.sksamuel.hoplite.addFileSource
-import dev.inmo.tgbotapi.bot.ktor.telegramBot
-import dev.inmo.tgbotapi.utils.TelegramAPIUrlsKeeper
 import io.github.alelk.apps.challengetgbot.config.AppConfig
-import io.github.alelk.apps.challengetgbot.db.DatabaseService
-import io.github.alelk.apps.challengetgbot.repository.ChallengeRepository
+import io.github.alelk.apps.challengetgbot.di.appModule
 import io.github.alelk.apps.challengetgbot.scheduler.ChallengeScheduler
 import io.github.alelk.apps.challengetgbot.telegram.TelegramBotService
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.ktor.client.*
-import io.ktor.client.engine.cio.*
 import kotlinx.coroutines.*
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
 import java.io.File
 
 private val log = KotlinLogging.logger {}
@@ -26,7 +23,7 @@ private val log = KotlinLogging.logger {}
 /**
  * Command to run the bot in daemon mode
  */
-class RunCommand : CliktCommand(name = "run") {
+class RunCommand : CliktCommand(name = "run"), KoinComponent {
 
     override fun help(context: Context): String = "Запустить бот в режиме демона"
 
@@ -45,37 +42,22 @@ class RunCommand : CliktCommand(name = "run") {
         log.info { "Starting Telegram Challenge Bot..." }
         log.info { "Loading configuration from: ${configFile.absolutePath}" }
 
-        val config = try {
-            ConfigLoaderBuilder.default()
-                .addFileSource(configFile)
-                .build()
-                .loadConfigOrThrow<AppConfig>()
+        // Initialize Koin DI
+        try {
+            startKoin {
+                modules(appModule(configFile))
+            }
         } catch (e: Exception) {
-            log.error(e) { "Failed to load configuration from ${configFile.absolutePath}" }
+            log.error(e) { "Failed to initialize application" }
             return
         }
 
+        // Get dependencies from Koin
+        val config: AppConfig by inject()
+        val telegramService: TelegramBotService by inject()
+        val scheduler: ChallengeScheduler by inject()
+
         log.info { "Configuration loaded. Managing ${config.groups.size} group(s)" }
-
-        // Initialize database
-        DatabaseService.init(config.databasePath)
-
-        // Initialize repository
-        val repository = ChallengeRepository()
-
-        // Initialize Telegram bot with custom timeout for long polling
-        // Long polling uses 25-30 second waits, so we need a longer request timeout
-        val bot = telegramBot(TelegramAPIUrlsKeeper(config.botToken)) {
-            client = HttpClient(CIO) {
-                engine {
-                    requestTimeout = 65_000 // 65 seconds to handle long polling
-                }
-            }
-        }
-        val telegramService = TelegramBotService(bot, repository)
-
-        // Initialize scheduler
-        val scheduler = ChallengeScheduler(telegramService, repository)
 
         // Create coroutine scope
         val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
@@ -96,6 +78,7 @@ class RunCommand : CliktCommand(name = "run") {
             log.info { "Shutting down..." }
             scheduler.stopScheduling()
             scope.cancel()
+            stopKoin()
             log.info { "Shutdown complete" }
         })
 
