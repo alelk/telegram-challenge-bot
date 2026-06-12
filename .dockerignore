@@ -1,0 +1,29 @@
+# ── Exclude from Docker build context ──
+
+.git
+.gitignore
+.github
+.idea
+*.md
+LICENSE
+
+# Gradle build output
+build/
+.gradle/
+
+# Node (semantic-release)
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker files (the context needs only the JAR + Dockerfile)
+docker-compose*.yaml
+docker-compose*.yml
+Dockerfile*
+.dockerignore
+
+# Env files
+.env
+.env.*

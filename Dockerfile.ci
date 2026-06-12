@@ -1,0 +1,37 @@
+# ============================================
+# Dockerfile.ci — Runtime-only image
+# Accepts a pre-built fat JAR via build arg.
+# Used by the manual docker-build workflow.
+# ============================================
+# Usage:
+#   docker build -f Dockerfile.ci \
+#     --build-arg JAR_PATH=app.jar \
+#     -t ghcr.io/alelk/telegram-challenge-bot:1.9.0 .
+
+FROM eclipse-temurin:21-jre-alpine
+
+LABEL org.opencontainers.image.source="https://github.com/alelk/telegram-challenge-bot"
+LABEL org.opencontainers.image.description="Telegram Challenge Bot"
+LABEL org.opencontainers.image.licenses="MIT"
+
+ARG JAR_PATH=app.jar
+
+# Non-root user
+RUN addgroup -g 1001 -S appgroup && \
+    adduser  -u 1001 -S appuser -G appgroup
+
+WORKDIR /app
+
+COPY ${JAR_PATH} ./app.jar
+
+RUN chown -R appuser:appgroup /app
+USER appuser
+
+ENV JAVA_OPTS="\
+  -XX:+UseContainerSupport \
+  -XX:MaxRAMPercentage=75.0 \
+  -XX:+UseG1GC \
+  -XX:+UseStringDeduplication \
+  -Djava.security.egd=file:/dev/./urandom"
+
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /app/app.jar"]
