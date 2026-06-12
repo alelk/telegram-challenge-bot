@@ -43,9 +43,20 @@ class DatabaseService private constructor(private val database: Database) {
          */
         operator fun invoke(databasePath: String): DatabaseService {
             logger.info { "Initializing database at: $databasePath" }
+            val (url, driver) = if (databasePath.startsWith("jdbc:postgresql://")) {
+                databasePath to "org.postgresql.Driver"
+            } else {
+                // Treat as H2 file path
+                val h2Url = if (databasePath.startsWith("jdbc:h2:")) {
+                    databasePath
+                } else {
+                    "jdbc:h2:file:$databasePath;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE"
+                }
+                h2Url to "org.h2.Driver"
+            }
             val database = Database.connect(
-                url = "jdbc:h2:file:$databasePath;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE",
-                driver = "org.h2.Driver"
+                url = url,
+                driver = driver
             )
             return DatabaseService(database)
         }
