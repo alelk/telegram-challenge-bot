@@ -1,5 +1,12 @@
 # Telegram Challenge Bot
 
+# [1.11.0](https://github.com/alelk/telegram-challenge-bot/compare/v1.10.0...v1.11.0) (2026-06-12)
+
+
+### Features
+
+* **ci:** add manual Docker build workflow ([e0e7012](https://github.com/alelk/telegram-challenge-bot/commit/e0e7012b1cb6bc627f32d193aedfcf281f22ad67))
+
 # [1.10.0](https://github.com/alelk/telegram-challenge-bot/compare/v1.9.0...v1.10.0) (2026-06-12)
 
 
