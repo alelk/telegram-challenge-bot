@@ -53,6 +53,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-kotlin-datetime:$exposedVersion")
     implementation("com.h2database:h2:2.2.224")
+    runtimeOnly("org.postgresql:postgresql:42.7.5")
 
     // Logging
     implementation("io.github.oshai:kotlin-logging-jvm:6.0.3")
