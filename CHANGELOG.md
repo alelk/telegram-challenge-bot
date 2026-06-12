@@ -1,5 +1,12 @@
 # Telegram Challenge Bot
 
+# [1.12.0](https://github.com/alelk/telegram-challenge-bot/compare/v1.11.0...v1.12.0) (2026-06-12)
+
+
+### Features
+
+* add PostgreSQL database driver and fix Docker entrypoint ([3577abd](https://github.com/alelk/telegram-challenge-bot/commit/3577abd1a4c431d21b45620bccdcccf90b9aefa3))
+
 # [1.11.0](https://github.com/alelk/telegram-challenge-bot/compare/v1.10.0...v1.11.0) (2026-06-12)
 
 
