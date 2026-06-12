@@ -1,5 +1,12 @@
 # Telegram Challenge Bot
 
+# [1.10.0](https://github.com/alelk/telegram-challenge-bot/compare/v1.9.0...v1.10.0) (2026-06-12)
+
+
+### Features
+
+* **docker:** add Dockerfiles for telegram-challenge-bot ([4e236e3](https://github.com/alelk/telegram-challenge-bot/commit/4e236e3094f50509bf9848eef60618fd0dd9b87d))
+
 # [1.9.0](https://github.com/alelk/telegram-challenge-bot/compare/v1.8.0...v1.9.0) (2026-01-09)
 
 
